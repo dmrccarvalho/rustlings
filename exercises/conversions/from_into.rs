@@ -40,10 +40,43 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
+// I AM N0T DONE
 
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        match s.split_once(',') {
+            Some((name, age_str)) => {
+                if name.is_empty() {
+                    Person::default()
+                } else if let Ok(age) = age_str.parse::<usize>() {
+                    Person{name: name.to_string(), age}
+                } else {
+                    Person::default()
+                }
+            },
+            None => Person::default()
+        }
+    }
+}
+
+// This is not needed for this excercise. Added a test case to test this.
+impl From<Vec<String>> for Person {
+    fn from(v: Vec<String>) -> Person {
+        if v.len() != 2 {
+            Person::default()
+        } else {
+            let age_parse = v[1].parse::<usize>();
+
+            // Test parse of age and non-empty name
+            if age_parse.is_err() || v[0].is_empty() {
+                Person::default()
+            } else {
+                Person {
+                    name: v[0].clone(),
+                    age: age_parse.unwrap()
+                }
+            }
+        }
     }
 }
 
@@ -136,5 +169,12 @@ mod tests {
         let p: Person = Person::from("Mike,32,man");
         assert_eq!(p.name, "John");
         assert_eq!(p.age, 30);
+    }
+
+    #[test]
+    fn test_test_good_convert_from_vec() {
+        let p: Person = Person::from(vec!("Mike".into(), "32".into()));
+        assert_eq!(p.name, "Mike");
+        assert_eq!(p.age, 32);
     }
 }
